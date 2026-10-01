@@ -1,0 +1,7 @@
+{
+  "status": "BLOCKED",
+  "recorded_at": "2026-10-02T02:18:19.538665",
+  "requested": 10,
+  "runs": [],
+  "blocked_reason": "Live agent unavailable: set ANTHROPIC_API_KEY in .env. No simulated agent is used."
+}

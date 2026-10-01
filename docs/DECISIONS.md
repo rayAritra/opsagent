@@ -33,3 +33,9 @@
 - Added five real CLI requests and an explicitly labeled simulated-human file. Human simulation supplies only approvals and missing-date answers, never browser actions.
 - Actually invoked every CLI demo: all five safely exited with FAILED and zero LLM tokens due to missing API credentials. Live demonstration acceptance is BLOCKED, not passed.
 - The user's follow-up explicitly requested building/testing locally without a key. Continue implementing evaluation and submission artifacts while keeping live acceptance pending.
+## Phase 6
+- Ten YAML tasks include five required demos, two additional invoice requests, manager rejection, an outside-sandbox banking request and an unknown vendor.
+- Evaluation runs use isolated app databases and serial resets; they do not discard the interactive sandbox's work.
+- Ground truth reads SQLite directly and independently of the agent's browser verifier. It checks exact field values and unrelated state changes, plus refusal evidence and recorded human decisions.
+- Implemented configurable repetitions, token/cost accounting, recovery totals, verifier agreement and false VERIFIED counts. Cost is unknown until per-token prices are configured.
+- Actually ran normal and chaos evaluation commands. Both are BLOCKED before live runs because .env has no API key. Success rates, verifier agreement and false VERIFIED counts remain unmeasured; no numbers were fabricated.

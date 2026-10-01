@@ -12,3 +12,4 @@ mock_company/shared_drive/invoices/
 *.egg-info/
 playwright-browsers/
 .scratch/
+evals/artifacts/
