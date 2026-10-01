@@ -46,3 +46,13 @@
 - Full local suite: 43 tests passed with no skips; one additional SOP strengthening test and targeted validation checks also passed. A fresh-clone full run follows in phase 8.
 - Added a structural ToolContext interface and type annotations to tools and HTTP boundaries. Ruff and pip dependency consistency checks pass.
 - Installed standard Python locally without PATH changes or shortcuts, created a normal venv and installed the locked dependencies successfully.
+## Phase 8
+- Added setup, truthful current acceptance/eval status, architecture diagram, decisions, limitations, next steps, dependency attribution and AI-assistance disclosure to README.
+- Added production architecture with implemented/proposed boundaries, a six-minute truthful recording plan and a code tour with three concrete extension exercises.
+- Live results and video are not fabricated. Fresh-clone local setup/testing follows; API-dependent checks remain explicitly blocked.
+
+- Final fresh-clone acceptance: new standard venv, locked dependencies, separate Chromium download, seed, pip check, 44-test complete suite (293.97s, no warnings/skips), Ruff, four-server startup and real Chromium dashboard smoke all pass.
+- Added a case-insensitive reserved browser-session-file guard and checked it with one further test in both workspaces. Final local suite contains 45 tests; the extra focused check passes in the clone.
+- Five CLI demos and normal/chaos evals were rerun in the fresh clone and accurately remain credential-blocked. No live LLM result is claimed.
+- GNU Make is unavailable locally; documented manage.py equivalents ran exactly the Makefile's Python commands. Linux/macOS and actual credentialed evaluations remain untested.
+- README links and copied eval table are verified. Git excludes API keys, cookie storage, run databases, generated fixtures and local Python/browser binaries.

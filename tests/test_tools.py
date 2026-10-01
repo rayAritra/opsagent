@@ -92,3 +92,12 @@ async def test_select_and_validation(ctx):
     schemas = definitions()
     assert len(schemas) >= 14
     assert all("ctx" not in d["input_schema"].get("properties", {}) for d in schemas)
+
+
+async def test_secret_browser_storage_not_model_readable(tmp_path):
+    context = SimpleNamespace(workspace=tmp_path)
+    (tmp_path / "browser-state.json").write_text('{"cookies":["private session"]}')
+    for name in ("browser-state.json", "BROWSER-STATE.json"):
+        result = await invoke(context, "files_read", {"path": str(tmp_path / name)})
+        assert result["error_type"] == "PERMISSION_DENIED"
+        assert result["data"] is None

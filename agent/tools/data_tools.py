@@ -17,7 +17,7 @@ def safe_path(ctx: ToolContext, path: str) -> Path:
     if not candidate.is_absolute():
         candidate = (DRIVE if path.startswith("sops") or path == "." else ctx.workspace) / candidate
     candidate = candidate.resolve()
-    if candidate.name == "browser-state.json":
+    if candidate.name.lower() == "browser-state.json":
         raise PermissionError("Browser session credentials are not readable by tools.")
     if not any(
         candidate == root.resolve() or root.resolve() in candidate.parents for root in (DRIVE, ctx.workspace)

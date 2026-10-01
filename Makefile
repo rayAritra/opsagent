@@ -1,4 +1,4 @@
-﻿PYTHON ?= python
+PYTHON ?= python
 .PHONY: setup seed run test eval eval-chaos demo
 setup:
 	$(PYTHON) -m pip install -r requirements.lock.txt
