@@ -1,0 +1,14 @@
+.runtime/
+.venv/
+*.zip
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.env
+runs/
+mock_company/data/
+mock_company/shared_drive/invoices/
+*.sqlite*
+*.egg-info/
+playwright-browsers/
+.scratch/

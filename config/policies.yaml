@@ -1,0 +1,5 @@
+approval_amount_above: 50000
+approve_external_send: true
+approve_vendor_changes: true
+allowed_hosts: [127.0.0.1, localhost, '::1']
+allowed_ports: [8001, 8002, 8003]
