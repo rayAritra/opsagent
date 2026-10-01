@@ -18,6 +18,19 @@ from tests.test_tools import control, sign_in
 
 @pytest.fixture
 async def operation(tmp_path, live_apps):
+    import os
+    import subprocess
+    import sys
+
+    from agent.config import ROOT
+
+    subprocess.run(
+        [sys.executable, "seed.py", "--reset"],
+        cwd=ROOT,
+        env={**os.environ, "OPSAGENT_DATA_DIR": str(live_apps)},
+        check=True,
+        capture_output=True,
+    )
     store = Store(tmp_path / "runs")
     run_id = store.create("Process latest invoice")
     workspace = store.root / run_id
@@ -307,3 +320,52 @@ async def test_runtime_question_pause_and_resume(tmp_path, live_apps):
     assert final["report"]["input_tokens"] == 60
     assert final["report"]["questions"][0]["answer"] == "2026-12-31"
     assert any(e["stage"] == "verifier" for e in final["events"] if e["kind"] == "llm")
+
+
+@pytest.mark.parametrize("amount,expected", [("50000.00", False), ("50000.01", True), ("49999.99", False)])
+def test_exact_approval_boundary(amount, expected):
+    from agent.policy import requires_amount_approval
+
+    assert requires_amount_approval(amount) == expected
+
+
+@pytest.mark.parametrize(
+    "kind", ["TRANSIENT", "ELEMENT_NOT_FOUND", "AUTH_EXPIRED", "VALIDATION", "PERMISSION_DENIED", "UNKNOWN"]
+)
+async def test_every_tool_error_is_structured(kind):
+    from agent.tool_registry import REGISTRY, ToolFailure, tool
+
+    @tool()
+    def failing_contract_tool(ctx):
+        """Test-only classified tool failure."""
+        raise ToolFailure(kind, "contract error")
+
+    try:
+        result = await invoke(None, "failing_contract_tool", {})
+        assert result == {"ok": False, "data": None, "error": "contract error", "error_type": kind}
+    finally:
+        REGISTRY.pop("failing_contract_tool")
+
+
+async def test_sop_requirement_strengthens_static_policy(tmp_path):
+    ctx = SimpleNamespace(
+        workspace=tmp_path,
+        spec={
+            "constraints": [],
+            "requirements": [
+                {
+                    "kind": "amount_approval",
+                    "applies_to": ["ledger"],
+                    "threshold": "1000",
+                    "citation": "sops/custom.md",
+                    "description": "Amounts above 1000 require approval",
+                }
+            ],
+        },
+    )
+    action = {"operation": "ledger", "values": {"amount": "1000.01"}}
+    result = await Policy().evaluate(ctx, action)
+    assert result["decision"] == "APPROVAL"
+    assert result["sop"] == "sops/custom.md"
+    action["values"]["amount"] = "1000.00"
+    assert (await Policy().evaluate(ctx, action))["decision"] == "ALLOW"

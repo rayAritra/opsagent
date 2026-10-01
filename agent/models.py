@@ -13,12 +13,26 @@ class Criterion(BaseModel):
     target: str = ""
 
 
+class PolicyRequirement(BaseModel):
+    """A supported SOP requirement that can strengthen static submission rules."""
+
+    model_config = ConfigDict(extra="forbid")
+    kind: Literal[
+        "approval_all_writes", "amount_approval", "source_domain", "never_duplicate", "missing_due_human"
+    ]
+    applies_to: list[str]
+    threshold: str = "50000"
+    citation: str
+    description: str
+
+
 class TaskSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
     outcome: str
     task_type: str
     inputs_needed: list[str]
     constraints: list[str]
+    requirements: list[PolicyRequirement] = Field(default_factory=list)
     success_criteria: list[Criterion] = Field(min_length=1)
     clarification: str = ""
 

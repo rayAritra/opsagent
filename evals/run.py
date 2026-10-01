@@ -37,6 +37,7 @@ def publish(mode: str, payload: dict) -> None:
         "| Mode | Status | Completed / requested | Task success | Verifier agreement | False VERIFIED | Avg steps | Avg tokens | Avg USD | Recoveries |",
         "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
+    notes = []
     for name in ("normal", "chaos"):
         path = directory / f"results-{name}.json"
         if not path.exists():
@@ -50,7 +51,8 @@ def publish(mode: str, payload: dict) -> None:
             f"| {name} | {data['status']} | {len(data['runs'])} / {data['requested']} | {metrics.get('success_rate', 'unmeasured')} | {metrics.get('verifier_agreement', 'unmeasured')} | {metrics.get('false_verified', 'unmeasured')} | {metrics.get('avg_steps', '—')} | {metrics.get('avg_tokens', '—')} | {metrics.get('avg_cost_usd', 'unknown')} | {metrics.get('recoveries', '—')} |"
         )
         if data.get("blocked_reason"):
-            lines += ["", f"{name}: {data['blocked_reason']}", ""]
+            notes += ["", f"{name}: {data['blocked_reason']}", ""]
+    lines += notes
     lines += [
         "",
         "Full results: `results-normal.json`, `results-chaos.json`. Trace and report artifacts for completed runs are under `evals/artifacts/`.",

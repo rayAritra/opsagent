@@ -7,10 +7,11 @@ import pdfplumber
 from rank_bm25 import BM25Okapi
 
 from agent.config import DRIVE
+from agent.context import ToolContext
 from agent.tool_registry import tool
 
 
-def safe_path(ctx, path: str) -> Path:
+def safe_path(ctx: ToolContext, path: str) -> Path:
     """Resolve within shared drive or the current run, denying symlink escapes."""
     candidate = Path(path)
     if not candidate.is_absolute():
@@ -26,7 +27,7 @@ def safe_path(ctx, path: str) -> Path:
 
 
 @tool()
-def files_list(ctx, path: str = "."):
+def files_list(ctx: ToolContext, path: str = ".") -> list[dict]:
     """List a sandbox directory. '.' is the shared drive; 'sops' contains company procedures."""
     return [
         {"name": p.name, "path": str(p), "directory": p.is_dir()}
@@ -35,7 +36,7 @@ def files_list(ctx, path: str = "."):
 
 
 @tool()
-def files_read(ctx, path: str):
+def files_read(ctx: ToolContext, path: str) -> dict:
     """Read a UTF-8 text file from the shared drive or current run workspace."""
     file = safe_path(ctx, path)
     if file.stat().st_size > 100000:
@@ -44,7 +45,7 @@ def files_read(ctx, path: str):
 
 
 @tool()
-def pdf_extract(ctx, path: str):
+def pdf_extract(ctx: ToolContext, path: str) -> dict:
     """Extract text and tables from a real PDF, retaining its path as source evidence."""
     file = safe_path(ctx, path)
     with pdfplumber.open(file) as pdf:
@@ -58,12 +59,12 @@ def pdf_extract(ctx, path: str):
 
 
 @tool()
-def knowledge_search(ctx, query: str):
+def knowledge_search(ctx: ToolContext, query: str) -> list[dict]:
     """Retrieve top relevant SOP passages using BM25, including document filenames."""
     docs = sorted((DRIVE / "sops").glob("*.md"))
     texts = [p.read_text(encoding="utf-8-sig") for p in docs]
 
-    def tokenize(text):
+    def tokenize(text: str) -> list[str]:
         return re.findall(r"\w+", text.lower())
 
     index = BM25Okapi([tokenize(p.stem.replace("_", " ") + " " + text) for p, text in zip(docs, texts)])
@@ -80,33 +81,33 @@ def knowledge_search(ctx, query: str):
 
 
 @tool()
-def memory_note(ctx, key: str, value: str):
+def memory_note(ctx: ToolContext, key: str, value: str) -> dict:
     """Keep a discovered fact in the persisted run scratchpad."""
     ctx.memory[key] = value
     return {"stored": key}
 
 
 @tool()
-def memory_get(ctx):
+def memory_get(ctx: ToolContext) -> dict:
     """Read all persisted scratchpad facts."""
     return dict(ctx.memory)
 
 
 @tool()
-async def ask_human(ctx, question: str):
+async def ask_human(ctx: ToolContext, question: str) -> dict:
     """Pause durably for missing information. Never guess a missing due date."""
     return await ctx.human_question(question)
 
 
 @tool()
-def finish(ctx, summary: str, claimed_outcome: dict):
+def finish(ctx: ToolContext, summary: str, claimed_outcome: dict) -> dict:
     """Request independent verification. Supply criterion bindings and source paths; claims are not evidence."""
     ctx.finish_request = {"summary": summary, "claimed_outcome": claimed_outcome}
     return {"verification_requested": True}
 
 
 @tool()
-def plan_update(ctx, step: int, status: str, note: str = ""):
+def plan_update(ctx: ToolContext, step: int, status: str, note: str = "") -> dict:
     """Update a zero-based plan step to pending, active, done or blocked, with a short progress note."""
     if status not in ("pending", "active", "done", "blocked") or not 0 <= step < len(ctx.plan["steps"]):
         raise ValueError("Invalid plan step or status")

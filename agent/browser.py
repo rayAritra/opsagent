@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from urllib.parse import urlparse
 
-from playwright.async_api import async_playwright
+from playwright.async_api import Locator, async_playwright
 
 from agent.config import POLICIES, ROOT
 from agent.tool_registry import ToolFailure
@@ -40,7 +40,7 @@ def allowed_url(url: str) -> bool:
 class BrowserSession:
     """Own one isolated browser context, numbered observation and restart checkpoint."""
 
-    def __init__(self, workspace: Path):
+    def __init__(self, workspace: Path) -> None:
         self.workspace = workspace
         self.workspace.mkdir(parents=True, exist_ok=True)
         self.page = None
@@ -66,7 +66,7 @@ class BrowserSession:
             viewport={"width": 1400, "height": 950},
         )
 
-        async def gate(route):
+        async def gate(route) -> None:
             if allowed_url(route.request.url):
                 await route.continue_()
             else:
@@ -100,7 +100,7 @@ class BrowserSession:
             "screenshot": screenshot,
         }
 
-    async def element(self, element_id: int):
+    async def element(self, element_id: int) -> Locator:
         """Reject stale IDs instead of guessing another control."""
         if self.observed_url != self.page.url or element_id not in self.elements:
             raise ToolFailure("ELEMENT_NOT_FOUND", "Observe the current page before using an element ID.")
@@ -115,7 +115,7 @@ class BrowserSession:
             raise ToolFailure("TRANSIENT", f"HTTP {response.status}; service temporarily unavailable.")
         if response and response.status in (401, 403):
             raise ToolFailure("AUTH_EXPIRED", "Session is invalid; sign in again.")
-        if expect_auth and "/login" in self.page.url:
+        if "/login" in self.page.url and (expect_auth or "expired=1" in self.page.url):
             raise ToolFailure("AUTH_EXPIRED", "Session expired; use credential references to sign in.")
         alert = self.page.locator("[role=alert]")
         if await alert.count() and await alert.is_visible():

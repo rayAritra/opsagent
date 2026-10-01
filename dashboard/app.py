@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 import json
 import secrets
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
@@ -39,7 +40,7 @@ def create_dashboard(store: Store | None = None, worker: bool = True) -> FastAPI
     scheduled = set()
     templates = Jinja2Templates(directory=str(ROOT / "dashboard" / "templates"))
 
-    async def consume():
+    async def consume() -> None:
         while True:
             run_id = await queue.get()
             try:
@@ -48,13 +49,13 @@ def create_dashboard(store: Store | None = None, worker: bool = True) -> FastAPI
                 scheduled.discard(run_id)
                 queue.task_done()
 
-    def schedule(run_id: str):
+    def schedule(run_id: str) -> None:
         if worker and run_id not in scheduled:
             scheduled.add(run_id)
             queue.put_nowait(run_id)
 
     @asynccontextmanager
-    async def lifespan(app):
+    async def lifespan(app) -> AsyncIterator[None]:
         task = asyncio.create_task(consume()) if worker else None
         for row in store.history()[::-1]:
             if row["status"] in ("QUEUED", "RUNNING"):
@@ -91,13 +92,13 @@ def create_dashboard(store: Store | None = None, worker: bool = True) -> FastAPI
             raise HTTPException(403, "Reload the dashboard before submitting changes.")
 
     @app.get("/health")
-    async def health():
+    async def health() -> dict:
         return {"ok": True}
 
     @app.get("/", response_class=HTMLResponse)
     @app.get("/history", response_class=HTMLResponse)
     @app.get("/runs/{run_id}", response_class=HTMLResponse)
-    async def home(request: Request, run_id: str = ""):
+    async def home(request: Request, run_id: str = "") -> HTMLResponse:
         if run_id:
             get_run(run_id)
         request.session.setdefault("csrf", secrets.token_hex(24))
@@ -112,18 +113,18 @@ def create_dashboard(store: Store | None = None, worker: bool = True) -> FastAPI
         )
 
     @app.get("/static/{name}")
-    async def static(name: str):
+    async def static(name: str) -> FileResponse:
         if name not in ("dashboard.css", "dashboard.js"):
             raise HTTPException(404)
         return FileResponse(ROOT / "dashboard" / "static" / name)
 
     @app.get("/api/config")
-    async def config():
+    async def config() -> dict:
         cfg = json.loads((ROOT / "mock_company" / "chaos.json").read_text(encoding="utf-8-sig"))
         return {"chaos": cfg.get("enabled", False)}
 
     @app.post("/api/chaos")
-    async def chaos(request: Request, payload: ChaosInput):
+    async def chaos(request: Request, payload: ChaosInput) -> dict:
         guard(request)
         path = ROOT / "mock_company" / "chaos.json"
         cfg = json.loads(path.read_text(encoding="utf-8-sig"))
@@ -132,24 +133,24 @@ def create_dashboard(store: Store | None = None, worker: bool = True) -> FastAPI
         return {"chaos": cfg["enabled"]}
 
     @app.get("/api/runs")
-    async def history():
+    async def history() -> list[dict]:
         return store.history()
 
     @app.post("/api/runs")
-    async def start(request: Request, payload: TaskInput):
+    async def start(request: Request, payload: TaskInput) -> dict:
         guard(request)
         run_id = store.create(payload.task.strip())
         schedule(run_id)
         return {"id": run_id}
 
     @app.get("/api/runs/{run_id}")
-    async def detail(run_id: str):
+    async def detail(run_id: str) -> dict:
         row = get_run(run_id)
         # Never expose stored signed-session cookies; only a non-secret page URL/draft is in state.
         return row
 
     @app.post("/api/runs/{run_id}/decision")
-    async def decision(request: Request, run_id: str, payload: Decision):
+    async def decision(request: Request, run_id: str, payload: Decision) -> dict:
         guard(request)
         get_run(run_id)
         try:
@@ -162,7 +163,7 @@ def create_dashboard(store: Store | None = None, worker: bool = True) -> FastAPI
         return {"ok": True}
 
     @app.get("/artifacts/{run_id}/{name:path}")
-    async def artifact(run_id: str, name: str):
+    async def artifact(run_id: str, name: str) -> FileResponse:
         get_run(run_id)
         root = (store.root / run_id).resolve()
         path = (root / name).resolve()

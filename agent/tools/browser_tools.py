@@ -2,13 +2,16 @@
 
 from pathlib import Path
 
+from playwright.async_api import TimeoutError as BrowserTimeout
+
 from agent.browser import allowed_url
+from agent.context import ToolContext
 from agent.credentials import resolve
 from agent.tool_registry import Risk, ToolFailure, tool
 
 
 @tool()
-async def browser_navigate(ctx, url: str):
+async def browser_navigate(ctx: ToolContext, url: str) -> dict:
     """Open an allowed sandbox URL. Outside hosts and ports are blocked."""
     if not allowed_url(url):
         raise ToolFailure("PERMISSION_DENIED", "Navigation outside configured sandbox apps is blocked.")
@@ -18,18 +21,18 @@ async def browser_navigate(ctx, url: str):
 
 
 @tool()
-async def browser_observe(ctx):
+async def browser_observe(ctx: ToolContext) -> dict:
     """Read visible page text and numbered controls with select options; save a screenshot."""
     return await ctx.browser.observe()
 
 
 @tool(Risk.WRITE)
-async def browser_click(ctx, element_id: int):
+async def browser_click(ctx: ToolContext, element_id: int) -> dict:
     """Click a freshly observed control; submission is guarded by runtime policy."""
     locator = await ctx.browser.element(element_id)
     responses = []
 
-    def capture(response):
+    def capture(response) -> None:
         if response.request.resource_type == "document":
             responses.append(response)
 
@@ -46,7 +49,7 @@ async def browser_click(ctx, element_id: int):
 
 
 @tool(Risk.WRITE)
-async def browser_type(ctx, element_id: int, text: str):
+async def browser_type(ctx: ToolContext, element_id: int, text: str) -> dict:
     """Fill an input. Use $portal_creds.username/password (or erp/mail) for login."""
     locator = await ctx.browser.element(element_id)
     secret = text.startswith("$")
@@ -64,22 +67,26 @@ async def browser_type(ctx, element_id: int, text: str):
 
 
 @tool(Risk.WRITE)
-async def browser_select(ctx, element_id: int, value: str):
+async def browser_select(ctx: ToolContext, element_id: int, value: str) -> dict:
     """Choose an exact option value from a freshly observed select element."""
     await (await ctx.browser.element(element_id)).select_option(value=value)
     return {"selected": element_id, "value": value}
 
 
 @tool()
-async def browser_download(ctx, element_id: int):
+async def browser_download(ctx: ToolContext, element_id: int) -> dict:
     """Download a real document through the browser into this run's workspace."""
     locator = await ctx.browser.element(element_id)
     if await locator.evaluate("(e)=>e.tagName") != "A" or await locator.get_attribute("download") is None:
         raise ToolFailure(
             "PERMISSION_DENIED", "Download tool accepts only document download links, never form controls."
         )
-    async with ctx.browser.page.expect_download() as event:
-        await locator.click()
+    try:
+        async with ctx.browser.page.expect_download() as event:
+            await locator.click()
+    except BrowserTimeout:
+        await ctx.browser.check_response()
+        raise
     download = await event.value
     name = Path(download.suggested_filename).name
     path = ctx.workspace / name

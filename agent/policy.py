@@ -5,6 +5,7 @@ import json
 import re
 from decimal import Decimal
 from pathlib import Path
+from typing import Any
 
 from agent.config import APPS, POLICIES
 from agent.evidence import invoice_values
@@ -12,10 +13,15 @@ from agent.reader import Reader
 from agent.tool_registry import REGISTRY, Risk, ToolFailure
 
 
+def requires_amount_approval(amount: str) -> bool:
+    """Apply the strict greater-than manager-approval threshold using exact money."""
+    return Decimal(amount) > Decimal(str(POLICIES["approval_amount_above"]))
+
+
 class Policy:
     """Separate staging, login and search from business mutations; fail closed."""
 
-    async def inspect_action(self, ctx, name: str, arguments: dict) -> dict | None:
+    async def inspect_action(self, ctx: Any, name: str, arguments: dict) -> dict | None:
         if name != "browser_click":
             if name in ("browser_type", "browser_select"):
                 return None  # Staging a field does not mutate the business system.
@@ -51,7 +57,7 @@ class Policy:
             "url": info["action"],
         }
 
-    async def evaluate(self, ctx, action: dict | None) -> dict:
+    async def evaluate(self, ctx: Any, action: dict | None) -> dict:
         """Return ALLOW/APPROVAL/DENY after fresh readback and source validation."""
         if action is None:
             return {"decision": "ALLOW"}
@@ -112,7 +118,7 @@ class Policy:
                             "reason": "Due date must match the PDF or a recorded human answer when absent.",
                             "sop": "sops/invoice_processing.md",
                         }
-                    if Decimal(values["amount"]) > Decimal(str(POLICIES["approval_amount_above"])):
+                    if requires_amount_approval(values["amount"]):
                         reason = "Amount exceeds INR 50,000; manager approval required."
                         sop = "sops/invoice_processing.md"
                 elif op == "vendor":
@@ -158,6 +164,15 @@ class Policy:
                         return {"decision": "ALLOW"}
                     reason = "External send requires human review of recipient, subject and body."
                     sop = "sops/reporting.md"
+        for rule in ctx.spec.get("requirements", []):
+            if op not in rule["applies_to"]:
+                continue
+            required = rule["kind"] == "approval_all_writes"
+            if rule["kind"] == "amount_approval" and values.get("amount"):
+                required = Decimal(values["amount"]) > Decimal(rule["threshold"])
+            if required:
+                reason = rule["description"]
+                sop = rule["citation"]
         # SOP-derived restrictions may strengthen but cannot weaken static rules.
         requirements = " ".join(ctx.spec.get("constraints", [])).lower()
         if not reason and "approval" in requirements and op not in ("payable",):

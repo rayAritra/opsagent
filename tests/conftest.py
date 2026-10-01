@@ -13,6 +13,12 @@ from mock_company.db import ROOT
 
 @pytest.fixture(scope="session")
 def live_apps(tmp_path_factory):
+    for port in (8001, 8002, 8003):
+        try:
+            httpx.get(f"http://127.0.0.1:{port}/health", timeout=0.3, trust_env=False)
+        except httpx.HTTPError:
+            continue
+        pytest.fail("Stop run_all.py before tests; browser checks require exclusive sandbox ports.")
     data = tmp_path_factory.mktemp("live-app-data")
     env = {**os.environ, "OPSAGENT_DATA_DIR": str(data), "OPSAGENT_CHAOS": "0"}
     subprocess.run([sys.executable, "seed.py", "--reset"], cwd=ROOT, env=env, check=True, capture_output=True)

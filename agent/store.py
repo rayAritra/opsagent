@@ -10,7 +10,7 @@ from agent.config import RUNS
 
 
 class Store:
-    def __init__(self, root: Path = RUNS):
+    def __init__(self, root: Path = RUNS) -> None:
         self.root = root
         root.mkdir(parents=True, exist_ok=True)
         self.path = root / "state.sqlite"

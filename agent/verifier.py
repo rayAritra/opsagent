@@ -4,6 +4,7 @@ import hashlib
 import re
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 from agent.config import DRIVE
 from agent.evidence import invoice_values, overdue_rows
@@ -21,7 +22,7 @@ def matches_target(target: str, name: str) -> bool:
 class Verifier:
     """Check fixed criteria against fresh state, original PDFs and durable human decisions."""
 
-    async def verify(self, ctx, claimed: dict, judge=None) -> dict:
+    async def verify(self, ctx: Any, claimed: dict, judge=None) -> dict:
         criteria = []
         fresh = None
         try:
@@ -76,7 +77,7 @@ class Verifier:
         outcome = "FAILED" if "FAILED" in statuses else "PARTIAL" if "PARTIAL" in statuses else "VERIFIED"
         return {"outcome": outcome, "criteria": criteria}
 
-    async def check(self, ctx, reader: Reader, fresh: dict, criterion: dict, binding: dict) -> dict:
+    async def check(self, ctx: Any, reader: Reader, fresh: dict, criterion: dict, binding: dict) -> dict:
         """Deterministically check one supported state predicate."""
         kind = criterion["kind"]
         target = criterion.get("target", "")

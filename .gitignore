@@ -13,3 +13,4 @@ mock_company/shared_drive/invoices/
 playwright-browsers/
 .scratch/
 evals/artifacts/
+.python/

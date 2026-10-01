@@ -17,7 +17,7 @@ class Risk(StrEnum):
 class ToolFailure(Exception):
     """Classified operational error consumed by the tool boundary."""
 
-    def __init__(self, kind: str, message: str):
+    def __init__(self, kind: str, message: str) -> None:
         self.kind = kind
         super().__init__(message)
 
@@ -34,10 +34,10 @@ class Tool:
 REGISTRY: dict[str, Tool] = {}
 
 
-def tool(risk: Risk = Risk.READ):
+def tool(risk: Risk = Risk.READ) -> Callable:
     """Register a typed function without ctx as a model-visible argument."""
 
-    def register(fn: Callable):
+    def register(fn: Callable) -> Callable:
         fields = {}
         for name, parameter in inspect.signature(fn).parameters.items():
             if name == "ctx":

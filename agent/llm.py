@@ -27,7 +27,7 @@ class Provider(Protocol):
 
 
 class AnthropicProvider:
-    def __init__(self, key: str, model: str):
+    def __init__(self, key: str, model: str) -> None:
         from anthropic import AsyncAnthropic
 
         self.client = AsyncAnthropic(api_key=key, max_retries=2, timeout=60)
@@ -57,7 +57,7 @@ class AnthropicProvider:
 
 
 class OpenAIProvider:
-    def __init__(self, key: str, model: str, base_url: str):
+    def __init__(self, key: str, model: str, base_url: str) -> None:
         from openai import AsyncOpenAI
 
         self.client = AsyncOpenAI(api_key=key, base_url=base_url, max_retries=2, timeout=60)

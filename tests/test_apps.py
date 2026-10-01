@@ -121,3 +121,13 @@ async def test_chaos(monkeypatch):
         response = await client.get("/payables/new")
         assert "Save entry" in response.text
         assert response.text.index('id="notes"') < response.text.index('id="vendor"')
+
+
+async def test_apps_do_not_expose_other_databases():
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=create_app("portal")), base_url="http://test", follow_redirects=True
+    ) as client:
+        await login(client)
+        assert (await client.get("/payables/new")).status_code == 404
+        assert (await client.get("/vendors")).status_code == 404
+        assert (await client.post("/compose", data={"to": "finance@acme.test"})).status_code == 404

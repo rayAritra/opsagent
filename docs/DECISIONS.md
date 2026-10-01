@@ -39,3 +39,10 @@
 - Ground truth reads SQLite directly and independently of the agent's browser verifier. It checks exact field values and unrelated state changes, plus refusal evidence and recorded human decisions.
 - Implemented configurable repetitions, token/cost accounting, recovery totals, verifier agreement and false VERIFIED counts. Cost is unknown until per-token prices are configured.
 - Actually ran normal and chaos evaluation commands. Both are BLOCKED before live runs because .env has no API key. Success rates, verifier agreement and false VERIFIED counts remain unmeasured; no numbers were fabricated.
+## Phase 7
+- Added integration coverage for duplicate non-entry, trusted contact updates and corrupted-contact detection, exact sent-summary content, durable approval before mutation, real renamed/reordered controls, HTTP failures and session expiry.
+- Reset isolated live databases per operation test; require exclusive ports to avoid accidentally testing a running interactive sandbox.
+- All six tool error classifications, exact INR 50,000 boundary behavior, SOP-derived structured requirements, loop recovery and generalization constraints are covered.
+- Full local suite: 43 tests passed with no skips; one additional SOP strengthening test and targeted validation checks also passed. A fresh-clone full run follows in phase 8.
+- Added a structural ToolContext interface and type annotations to tools and HTTP boundaries. Ruff and pip dependency consistency checks pass.
+- Installed standard Python locally without PATH changes or shortcuts, created a normal venv and installed the locked dependencies successfully.

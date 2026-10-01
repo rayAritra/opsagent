@@ -14,6 +14,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.responses import Response
 
 from mock_company.db import DATA, DRIVE, ROOT, connect, query
 
@@ -45,7 +46,17 @@ def create_app(kind: str) -> FastAPI:
     )
 
     @app.middleware("http")
-    async def chaos(request: Request, call_next):
+    async def chaos(request: Request, call_next) -> Response:
+        path = request.url.path
+        owned = {
+            "portal": ("/invoices",),
+            "erp": ("/payables", "/vendors"),
+            "mail": ("/inbox", "/sent", "/messages", "/compose"),
+        }
+        if path not in ("/", "/login", "/health") and not any(
+            path.startswith(prefix) for prefix in owned[kind]
+        ):
+            return HTMLResponse("Not found", status_code=404)
         cfg = chaos_config()
         request.state.chaos = cfg
         if cfg["enabled"] and request.url.path != "/health":
@@ -75,7 +86,7 @@ def create_app(kind: str) -> FastAPI:
             },
         )
 
-    def auth(request: Request):
+    def auth(request: Request) -> Response | None:
         if not request.session.get("user"):
             return RedirectResponse("/login", status_code=303)
         return None
@@ -87,11 +98,11 @@ def create_app(kind: str) -> FastAPI:
         return fields
 
     @app.get("/health")
-    async def health():
+    async def health() -> dict:
         return {"ok": True, "app": kind}
 
     @app.get("/login")
-    async def login_page(request: Request):
+    async def login_page(request: Request) -> Response:
         return render(
             request,
             "login",
@@ -99,7 +110,7 @@ def create_app(kind: str) -> FastAPI:
         )
 
     @app.post("/login")
-    async def login(request: Request):
+    async def login(request: Request) -> Response:
         fields = await form(request)
         if fields.get("username") == "demo" and fields.get("password") == "demo" and "_error" not in fields:
             request.session["user"] = "demo"
@@ -107,7 +118,7 @@ def create_app(kind: str) -> FastAPI:
         return render(request, "login", error=fields.get("_error", "Incorrect username or password."))
 
     @app.get("/")
-    async def home(request: Request):
+    async def home(request: Request) -> Response:
         if denied := auth(request):
             return denied
         search = request.query_params.get("search", "").strip()
@@ -143,7 +154,7 @@ def create_app(kind: str) -> FastAPI:
         return RedirectResponse("/inbox", status_code=303)
 
     @app.get("/invoices/{invoice_id}")
-    async def invoice(request: Request, invoice_id: int):
+    async def invoice(request: Request, invoice_id: int) -> Response:
         if denied := auth(request):
             return denied
         rows = query(kind, "SELECT * FROM invoices WHERE id=?", (invoice_id,)) if kind == "portal" else []
@@ -152,7 +163,7 @@ def create_app(kind: str) -> FastAPI:
         return render(request, "invoice", row=rows[0])
 
     @app.get("/invoices/{invoice_id}/pdf")
-    async def pdf(request: Request, invoice_id: int):
+    async def pdf(request: Request, invoice_id: int) -> Response:
         if denied := auth(request):
             return denied
         rows = query(kind, "SELECT * FROM invoices WHERE id=?", (invoice_id,)) if kind == "portal" else []
@@ -163,7 +174,7 @@ def create_app(kind: str) -> FastAPI:
         )
 
     @app.get("/payables/new")
-    async def new_payable(request: Request):
+    async def new_payable(request: Request) -> Response:
         if denied := auth(request):
             return denied
         return render(
@@ -171,7 +182,7 @@ def create_app(kind: str) -> FastAPI:
         )
 
     @app.post("/payables/new")
-    async def save_payable(request: Request):
+    async def save_payable(request: Request) -> Response:
         if denied := auth(request):
             return denied
         values = await form(request)
@@ -203,13 +214,13 @@ def create_app(kind: str) -> FastAPI:
         )
 
     @app.get("/vendors")
-    async def vendors(request: Request):
+    async def vendors(request: Request) -> Response:
         if denied := auth(request):
             return denied
         return render(request, "vendors", rows=query("erp", "SELECT * FROM vendors"))
 
     @app.get("/vendors/{vendor_id}/edit")
-    async def edit_vendor(request: Request, vendor_id: int):
+    async def edit_vendor(request: Request, vendor_id: int) -> Response:
         if denied := auth(request):
             return denied
         rows = query("erp", "SELECT * FROM vendors WHERE id=?", (vendor_id,))
@@ -218,7 +229,7 @@ def create_app(kind: str) -> FastAPI:
         return render(request, "edit_vendor", row=rows[0], error="")
 
     @app.post("/vendors/{vendor_id}/edit")
-    async def update_vendor(request: Request, vendor_id: int):
+    async def update_vendor(request: Request, vendor_id: int) -> Response:
         if denied := auth(request):
             return denied
         values = await form(request)
@@ -240,7 +251,7 @@ def create_app(kind: str) -> FastAPI:
 
     @app.get("/inbox")
     @app.get("/sent")
-    async def messages(request: Request):
+    async def messages(request: Request) -> Response:
         if denied := auth(request):
             return denied
         folder = request.url.path.strip("/")
@@ -252,7 +263,7 @@ def create_app(kind: str) -> FastAPI:
         )
 
     @app.get("/messages/{message_id}")
-    async def message(request: Request, message_id: int):
+    async def message(request: Request, message_id: int) -> Response:
         if denied := auth(request):
             return denied
         rows = query("mail", "SELECT * FROM messages WHERE id=?", (message_id,))
@@ -261,13 +272,13 @@ def create_app(kind: str) -> FastAPI:
         return render(request, "message", row=rows[0])
 
     @app.get("/compose")
-    async def compose(request: Request):
+    async def compose(request: Request) -> Response:
         if denied := auth(request):
             return denied
         return render(request, "compose", values={}, error="")
 
     @app.post("/compose")
-    async def send(request: Request):
+    async def send(request: Request) -> Response:
         if denied := auth(request):
             return denied
         values = await form(request)

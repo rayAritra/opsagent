@@ -12,14 +12,14 @@ from agent.tool_registry import ToolFailure
 class Reader:
     """Read real HTML tables and messages in a separate signed-in browser context."""
 
-    def __init__(self, workspace: Path):
+    def __init__(self, workspace: Path) -> None:
         self.browser = BrowserSession(workspace)
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "Reader":
         await self.browser.start()
         return self
 
-    async def __aexit__(self, *args):
+    async def __aexit__(self, *args) -> None:
         await self.browser.close()
 
     async def visit(self, app: str, path: str = "/") -> None:
