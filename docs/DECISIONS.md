@@ -23,3 +23,9 @@
 - Provider calls use native tool calling with exactly one action per iteration. A contract-only test fixture exercises lifecycle; no scripted provider exists in agent code.
 - Live LLM acceptance remains unavailable without a user-supplied API key. Local integration checks verify the runtime mechanics independently.
 - Phase 3 local acceptance: 23 checks passed; added durable runtime restart and updated send policy checks both pass. Live provider behavior is explicitly pending credentials.
+## Phase 4
+- Use server-rendered HTML and vanilla JavaScript polling; no frontend build pipeline is required.
+- The dashboard queues runs onto one worker so simultaneous browser mutations cannot contaminate verification baselines.
+- Human card decisions use signed sessions and CSRF headers. Secret browser storage is excluded from artifact access.
+- Startup requeues interrupted runs and resumes resolved human cards. Unanswered cards remain paused across restarts.
+- Phase 4 acceptance: dashboard HTTP tests and actual Chromium UI smoke pass. Task input, polling, report display and no-JavaScript-error checks verified; missing-key run honestly reports FAILED. All four servers start with one command.
