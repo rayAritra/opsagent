@@ -14,3 +14,12 @@
 - Phase 1 acceptance: 8 HTTP tests passed. A Git ownership difference requires repository-scoped safe.directory for commits; no global Git configuration was changed.
 - Dependencies are recorded in requirements.lock.txt to make fresh setup reproducible.
 - Phase 2 acceptance: all 10 HTTP and real Chromium tests pass; SOP filenames normalized for Windows and Unix.
+## Phase 3
+- Typed criteria use a narrow set of independent state adapters. A separate browser rereads ERP, mail and original latest PDFs; it never trusts the executor's claim or scratchpad values.
+- Source PDFs use independent labeled-value parsing and document hash comparison. Unsupported PDFs escalate rather than silently verify.
+- Approval fingerprints include operation, target and exact staged values. Rejection is durable and blocks repeated operations in that run.
+- Runs pause by checkpointing and releasing Chromium; a new Runtime consumes persisted answers/decisions and restores the draft in a fresh context.
+- In-flight writes are checkpointed before submission. Uncertain writes are reconciled rather than blindly retried; duplicate payables and identical sent messages are blocked.
+- Provider calls use native tool calling with exactly one action per iteration. A contract-only test fixture exercises lifecycle; no scripted provider exists in agent code.
+- Live LLM acceptance remains unavailable without a user-supplied API key. Local integration checks verify the runtime mechanics independently.
+- Phase 3 local acceptance: 23 checks passed; added durable runtime restart and updated send policy checks both pass. Live provider behavior is explicitly pending credentials.

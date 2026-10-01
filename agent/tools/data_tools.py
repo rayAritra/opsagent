@@ -103,3 +103,12 @@ def finish(ctx, summary: str, claimed_outcome: dict):
     """Request independent verification. Supply criterion bindings and source paths; claims are not evidence."""
     ctx.finish_request = {"summary": summary, "claimed_outcome": claimed_outcome}
     return {"verification_requested": True}
+
+
+@tool()
+def plan_update(ctx, step: int, status: str, note: str = ""):
+    """Update a zero-based plan step to pending, active, done or blocked, with a short progress note."""
+    if status not in ("pending", "active", "done", "blocked") or not 0 <= step < len(ctx.plan["steps"]):
+        raise ValueError("Invalid plan step or status")
+    ctx.plan["steps"][step]["status"] = status
+    return {"step": step, "status": status, "note": note}

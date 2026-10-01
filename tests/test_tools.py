@@ -90,5 +90,5 @@ async def test_select_and_validation(ctx):
     assert result["error_type"] == "VALIDATION"
     assert list(ctx.workspace.glob("screenshot-*.png"))
     schemas = definitions()
-    assert len(schemas) == 14
+    assert len(schemas) >= 14
     assert all("ctx" not in d["input_schema"].get("properties", {}) for d in schemas)

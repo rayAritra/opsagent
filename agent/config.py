@@ -11,3 +11,5 @@ APPS = yaml.safe_load((ROOT / "config" / "apps.yaml").read_text(encoding="utf-8-
 POLICIES = yaml.safe_load((ROOT / "config" / "policies.yaml").read_text(encoding="utf-8-sig"))
 DRIVE = ROOT / "mock_company" / "shared_drive"
 RUNS = ROOT / "runs"
+
+PROVIDERS = yaml.safe_load((ROOT / "config" / "providers.yaml").read_text(encoding="utf-8-sig"))
