@@ -29,3 +29,7 @@
 - Human card decisions use signed sessions and CSRF headers. Secret browser storage is excluded from artifact access.
 - Startup requeues interrupted runs and resumes resolved human cards. Unanswered cards remain paused across restarts.
 - Phase 4 acceptance: dashboard HTTP tests and actual Chromium UI smoke pass. Task input, polling, report display and no-JavaScript-error checks verified; missing-key run honestly reports FAILED. All four servers start with one command.
+## Phase 5
+- Added five real CLI requests and an explicitly labeled simulated-human file. Human simulation supplies only approvals and missing-date answers, never browser actions.
+- Actually invoked every CLI demo: all five safely exited with FAILED and zero LLM tokens due to missing API credentials. Live demonstration acceptance is BLOCKED, not passed.
+- The user's follow-up explicitly requested building/testing locally without a key. Continue implementing evaluation and submission artifacts while keeping live acceptance pending.

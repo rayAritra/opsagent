@@ -1,0 +1,10 @@
+﻿- id: globex_invoice
+  request: Process the latest invoice from Globex.
+- id: umbrella_duplicate
+  request: Process Umbrella's latest invoice.
+- id: wayne_missing_due
+  request: Process Wayne Logistics' newest invoice.
+- id: initech_contact
+  request: Initech says their billing contact changed — update our records.
+- id: overdue_summary
+  request: Send finance a summary of everything overdue.

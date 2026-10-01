@@ -1,0 +1,40 @@
+{
+  "recorded_at": "2026-10-02T02:13:15.910332",
+  "results": [
+    {
+      "id": "globex_invoice",
+      "request": "Process the latest invoice from Globex.",
+      "exit_code": 1,
+      "stdout": "{\n  \"run_id\": \"347990365936\",\n  \"task\": \"Process the latest invoice from Globex.\",\n  \"outcome\": \"FAILED\",\n  \"summary\": \"Run stopped safely: RuntimeError: Live agent unavailable: set ANTHROPIC_API_KEY in .env. No simulated agent is used.\",\n  \"criteria\": [],\n  \"key_values\": {},\n  \"approvals\": [],\n  \"questions\": [],\n  \"recoveries\": 0,\n  \"steps\": 0,\n  \"input_tokens\": 0,\n  \"output_tokens\": 0,\n  \"screenshots\": [],\n  \"cost_usd\": null,\n  \"elapsed_seconds\": 0.0\n}\nArtifacts: C:\\Users\\imaritra\\Desktop\\new_job\\runs\\347990365936\n",
+      "stderr": ""
+    },
+    {
+      "id": "umbrella_duplicate",
+      "request": "Process Umbrella's latest invoice.",
+      "exit_code": 1,
+      "stdout": "{\n  \"run_id\": \"8e99583d4424\",\n  \"task\": \"Process Umbrella's latest invoice.\",\n  \"outcome\": \"FAILED\",\n  \"summary\": \"Run stopped safely: RuntimeError: Live agent unavailable: set ANTHROPIC_API_KEY in .env. No simulated agent is used.\",\n  \"criteria\": [],\n  \"key_values\": {},\n  \"approvals\": [],\n  \"questions\": [],\n  \"recoveries\": 0,\n  \"steps\": 0,\n  \"input_tokens\": 0,\n  \"output_tokens\": 0,\n  \"screenshots\": [],\n  \"cost_usd\": null,\n  \"elapsed_seconds\": 0.0\n}\nArtifacts: C:\\Users\\imaritra\\Desktop\\new_job\\runs\\8e99583d4424\n",
+      "stderr": ""
+    },
+    {
+      "id": "wayne_missing_due",
+      "request": "Process Wayne Logistics' newest invoice.",
+      "exit_code": 1,
+      "stdout": "{\n  \"run_id\": \"3724cc572656\",\n  \"task\": \"Process Wayne Logistics' newest invoice.\",\n  \"outcome\": \"FAILED\",\n  \"summary\": \"Run stopped safely: RuntimeError: Live agent unavailable: set ANTHROPIC_API_KEY in .env. No simulated agent is used.\",\n  \"criteria\": [],\n  \"key_values\": {},\n  \"approvals\": [],\n  \"questions\": [],\n  \"recoveries\": 0,\n  \"steps\": 0,\n  \"input_tokens\": 0,\n  \"output_tokens\": 0,\n  \"screenshots\": [],\n  \"cost_usd\": null,\n  \"elapsed_seconds\": 0.0\n}\nArtifacts: C:\\Users\\imaritra\\Desktop\\new_job\\runs\\3724cc572656\n",
+      "stderr": ""
+    },
+    {
+      "id": "initech_contact",
+      "request": "Initech says their billing contact changed — update our records.",
+      "exit_code": 1,
+      "stdout": "{\n  \"run_id\": \"212d718e3f66\",\n  \"task\": \"Initech says their billing contact changed � update our records.\",\n  \"outcome\": \"FAILED\",\n  \"summary\": \"Run stopped safely: RuntimeError: Live agent unavailable: set ANTHROPIC_API_KEY in .env. No simulated agent is used.\",\n  \"criteria\": [],\n  \"key_values\": {},\n  \"approvals\": [],\n  \"questions\": [],\n  \"recoveries\": 0,\n  \"steps\": 0,\n  \"input_tokens\": 0,\n  \"output_tokens\": 0,\n  \"screenshots\": [],\n  \"cost_usd\": null,\n  \"elapsed_seconds\": 0.02\n}\nArtifacts: C:\\Users\\imaritra\\Desktop\\new_job\\runs\\212d718e3f66\n",
+      "stderr": ""
+    },
+    {
+      "id": "overdue_summary",
+      "request": "Send finance a summary of everything overdue.",
+      "exit_code": 1,
+      "stdout": "{\n  \"run_id\": \"8b2eb7a99f5d\",\n  \"task\": \"Send finance a summary of everything overdue.\",\n  \"outcome\": \"FAILED\",\n  \"summary\": \"Run stopped safely: RuntimeError: Live agent unavailable: set ANTHROPIC_API_KEY in .env. No simulated agent is used.\",\n  \"criteria\": [],\n  \"key_values\": {},\n  \"approvals\": [],\n  \"questions\": [],\n  \"recoveries\": 0,\n  \"steps\": 0,\n  \"input_tokens\": 0,\n  \"output_tokens\": 0,\n  \"screenshots\": [],\n  \"cost_usd\": null,\n  \"elapsed_seconds\": 0.0\n}\nArtifacts: C:\\Users\\imaritra\\Desktop\\new_job\\runs\\8b2eb7a99f5d\n",
+      "stderr": ""
+    }
+  ]
+}
