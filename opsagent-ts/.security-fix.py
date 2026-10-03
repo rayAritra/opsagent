@@ -1,0 +1,13 @@
+﻿from pathlib import Path
+r=Path('.')
+p=r/'packages/core/src/types.ts';s=p.read_text().replace("denyExternalNavigation:z.boolean().default(true)","allowedEmailDomains:z.array(z.string()).default([]),denyExternalNavigation:z.boolean().default(true)");p.write_text(s)
+p=r/'packages/core/src/policy.ts';s=p.read_text();s=s.replace("if(action.operation==='vendor_update'){", "if(action.operation==='mail_send'&&!employee.policies.allowedEmailDomains.includes((action.values.to||'').split('@')[1]?.toLowerCase()))return deny('Recipient domain is not allowed by employee policy');if(action.operation==='vendor_update'){");s=s.replace("if(!action.values.notes.includes", "if(!action.source?.body.includes(action.values.email)||!action.source?.body.includes(action.values.phone))return deny('Proposed contact values are not in the authenticated source message');if(!action.values.notes.includes");p.write_text(s)
+p=r/'packages/db/src/seed.ts';s=p.read_text().replace("denyExternalNavigation:true","allowedEmailDomains:['acme.test'],denyExternalNavigation:true");p.write_text(s)
+p=r/'apps/console/app/employees/[id]/page.tsx';s=p.read_text(encoding='utf8').replace("denyExternalNavigation:true","allowedEmailDomains:['acme.test'],denyExternalNavigation:true");p.write_text(s,encoding='utf8')
+p=r/'packages/core/src/runtime.ts';s=p.read_text().replace("content:JSON.stringify(result)});", "content:JSON.stringify({toolResultSummary:JSON.stringify(result).slice(0,1800)})});");p.write_text(s)
+p=r/'packages/core/src/browser.ts';s=p.read_text().replace("resolve,relative,basename","resolve,relative,basename,isAbsolute").replace("relative(this.directory,file).startsWith('..')", "(relative(this.directory,file).startsWith('..')||isAbsolute(relative(this.directory,file)))");p.write_text(s)
+p=r/'packages/db/src/config.ts';s=p.read_text().replace("export const env=schema.parse", "process.env.PLAYWRIGHT_BROWSERS_PATH=resolve(projectRoot,process.env.PLAYWRIGHT_BROWSERS_PATH||'.local/browsers');\nexport const env=schema.parse");p.write_text(s)
+for name in ['.env','.env.example','packages/db/src/config.ts']:
+ p=r/name;s=p.read_text().replace('claude-sonnet-4-6','claude-sonnet-5-5');p.write_text(s)
+p=r/'packages/core/src/llm.ts';s=p.read_text().replace('(input*3+output*15)','(input*2+output*10)');p.write_text(s)
+p=r/'tests/runtime.test.ts';s=p.read_text().replace("import {query}","import {query,env}").replace("await executeRun(org,id);const run=", "const keys=[env.ANTHROPIC_API_KEY,env.OPENAI_API_KEY];try{env.ANTHROPIC_API_KEY=undefined;env.OPENAI_API_KEY=undefined;await executeRun(org,id);}finally{[env.ANTHROPIC_API_KEY,env.OPENAI_API_KEY]=keys;}const run=");p.write_text(s)

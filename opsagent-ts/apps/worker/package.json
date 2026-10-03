@@ -1,0 +1,15 @@
+{
+  "name": "@opsagent/worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opsagent/core": "*",
+    "@opsagent/db": "*",
+    "tsx": "^4.20.0",
+    "yaml": "^2.8.0"
+  }
+}

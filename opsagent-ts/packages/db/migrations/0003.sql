@@ -1,0 +1,1 @@
+CREATE TABLE platform.tool_catalog(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),org_id uuid NOT NULL REFERENCES platform.orgs(org_id),name text NOT NULL,description text NOT NULL,risk_tier text NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),UNIQUE(org_id,name));

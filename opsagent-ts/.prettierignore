@@ -1,0 +1,12 @@
+node_modules
+.local
+artifacts
+.next
+**/.next
+.turbo
+**/.turbo
+.env
+test-results
+playwright-report
+package-lock.json
+*.py

@@ -1,0 +1,6 @@
+﻿from pathlib import Path
+p=Path('tests/runtime.test.ts');s=p.read_text().replace('      outcome: "Exact values",','      constraints:[],\n      outcome: "Exact values",');p.write_text(s)
+p=Path('packages/core/src/types.ts');s=p.read_text().replace('export type Checkpoint = {','export type Checkpoint = {\n  costKnown?:boolean;');p.write_text(s)
+p=Path('packages/core/src/runtime.ts');s=p.read_text();s=s.replace('  let browser: BrowserSession | undefined;', "  cp.costKnown=env.OPSAGENT_PROVIDER==='anthropic'&&(employee.model||env.OPSAGENT_MODEL)==='claude-sonnet-5-5';\n  let browser: BrowserSession | undefined;");s=s.replace('      costUsdEstimate: cp.cost,','      costUsdEstimate: cp.costKnown===false?null:cp.cost,');p.write_text(s)
+p=Path('apps/console/components/run-view.tsx');s=p.read_text();s=s.replace('      cost: number;', '      cost: number;\n      costKnown?:boolean;');s=s.replace('${cp.cost.toFixed(4)}', "{cp.costKnown===false?'Unmeasured':'$'+cp.cost.toFixed(4)}");p.write_text(s)
+p=Path('evals/run.ts');s=p.read_text();s=s.replace('          cost: number;', '          cost: number;\n          costKnown?:boolean;').replace('cost: run.checkpoint.cost,','cost:run.checkpoint.costKnown===false?null:run.checkpoint.cost,').replace('averageCostUsd: avg("cost"),','averageCostUsd:outcomes.every(r=>r.cost!==null)?avg("cost"):null,');p.write_text(s)

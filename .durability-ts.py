@@ -1,0 +1,18 @@
+﻿from pathlib import Path
+r=Path('opsagent-ts')
+def w(p,s):
+ p=r/p;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(s,encoding='utf8')
+p=r/'packages/core/src/browser.ts';s=p.read_text();s=s.replace('          tag: e.tagName.toLowerCase(),','          href:node.tagName===\'A\'?(node as HTMLAnchorElement).href:undefined,\n          tag: e.tagName.toLowerCase(),');s=s.replace('${info.value ? " value=" + info.value : ""}', '${info.value ? " value=" + info.value : ""}${info.href?" href="+info.href:""}');p.write_text(s)
+p=r/'packages/core/src/runtime.ts';s=p.read_text();s=s.replace('          await transition("COMPLETED");\n          try {','          try {');s=s.replace('            await event(orgId, runId, "lesson_error", { error: String(e) });\n          }\n          return;', '            await event(orgId, runId, "lesson_error", { error: String(e) });\n          }\n          await report(result);\n          await transition("COMPLETED");\n          return;');s=s.replace('    const provider = overrideProvider ||', "    const [lastStep]=await query<{count:string}>('SELECT COALESCE(max(index),0) AS count FROM platform.run_steps WHERE org_id=$1 AND run_id=$2',[orgId,runId]);cp.steps=Math.max(cp.steps,Number(lastStep.count));\n    const provider = overrideProvider ||");s=s.replace('if (old?.status === "EXECUTED")','if (old?.status === "UNCERTAIN")throw Error("POLICY_BLOCKED: the prior submission has an uncertain receipt; review it before creating a new run");\n          if (old?.status === "EXECUTED")');p.write_text(s)
+p=r/'apps/mock-company/lib/session.ts';s=p.read_text().replace('`/${system}/login?expired=1`','`/${system}/expire`');p.write_text(s)
+w('apps/mock-company/app/[system]/expire/route.ts',r'''import {NextResponse} from 'next/server';
+import {z} from 'zod';
+export async function GET(request:Request,{params}:{params:Promise<{system:string}>}){const system=z.enum(['portal','erp','mail']).parse((await params).system);const response=NextResponse.redirect(new URL('/'+system+'/login?expired=1',request.url));response.cookies.set('acme_'+system,'',{httpOnly:true,sameSite:'strict',path:'/'+system,maxAge:0});return response;}
+''')
+p=r/'apps/worker/src/index.ts';s=p.read_text();s=s.replace("WHERE status IN ('UNDERSTANDING','PLANNING','EXECUTING','VERIFYING') AND updated_at < now()-interval '60 seconds'", "WHERE (status IN ('QUEUED','UNDERSTANDING','PLANNING','EXECUTING','VERIFYING') AND updated_at < now()-interval '60 seconds') OR (status='AWAITING_APPROVAL' AND EXISTS(SELECT 1 FROM platform.approvals a WHERE a.run_id=platform.runs.id AND a.org_id=platform.runs.org_id AND a.status IN ('APPROVED','REJECTED')) AND NOT EXISTS(SELECT 1 FROM platform.approvals a WHERE a.run_id=platform.runs.id AND a.org_id=platform.runs.org_id AND a.status='PENDING')) OR (status='AWAITING_INPUT' AND EXISTS(SELECT 1 FROM platform.questions q WHERE q.run_id=platform.runs.id AND q.org_id=platform.runs.org_id AND q.status='ANSWERED') AND NOT EXISTS(SELECT 1 FROM platform.questions q WHERE q.run_id=platform.runs.id AND q.org_id=platform.runs.org_id AND q.status='PENDING'))");p.write_text(s)
+p=r/'tests/e2e/console.spec.ts';s=p.read_text();needle='  const [row] = await query<';idx=s.index(needle,s.index('second employee'));s=s[:idx]+'''  await page.getByText('Handle',{exact:true}).locator('..').locator('input').fill('vendor-mail');
+  await page.getByText('Username',{exact:true}).locator('..').locator('input').fill('demo');
+  await page.getByText('Password · write only',{exact:true}).locator('..').locator('input').fill('demo');
+  await page.getByRole('button',{name:'Save credential',exact:true}).click();
+  await expect(page.getByRole('status')).toContainText('Encrypted credential saved');
+'''+s[idx:];p.write_text(s)

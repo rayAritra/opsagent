@@ -1,1 +1,8 @@
-{"enabled": false, "failure_rate": 0.2, "latency_rate": 0.25, "expire_rate": 0.08, "rename": true, "reorder": true}
+{
+  "enabled": false,
+  "failure_rate": 0.2,
+  "latency_rate": 0.25,
+  "expire_rate": 0.08,
+  "rename": true,
+  "reorder": true
+}

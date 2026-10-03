@@ -1,0 +1,56 @@
+{
+  "name": "opsagent-platform",
+  "private": true,
+  "packageManager": "npm@11.16.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "tsx scripts/setup.ts",
+    "dev": "tsx scripts/dev.ts",
+    "typecheck": "tsc --noEmit --project tsconfig.json && turbo typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "node --import dotenv/config node_modules/vitest/vitest.mjs run",
+    "test:e2e": "node --import dotenv/config node_modules/playwright/cli.js test",
+    "seed": "tsx packages/db/src/seed.ts",
+    "db:migrate": "tsx packages/db/src/migrate.ts",
+    "eval": "tsx evals/run.ts",
+    "eval:chaos": "tsx evals/run.ts --chaos",
+    "agent": "tsx apps/worker/src/cli.ts",
+    "db:local": "tsx scripts/postgres.ts",
+    "browser:install": "node --import dotenv/config node_modules/playwright/cli.js install chromium",
+    "db:stop": "tsx scripts/stop-db.ts",
+    "test:unit": "node --import dotenv/config node_modules/vitest/vitest.mjs run tests/unit.test.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@playwright/test": "^1.58.0",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.39.0",
+    "typescript-eslint": "^8.0.0",
+    "prettier": "^3.6.0",
+    "tsx": "^4.20.0",
+    "turbo": "2.11.6",
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.11",
+    "dotenv": "^17.0.0",
+    "embedded-postgres": "16.14.0-beta.17",
+    "yaml": "^2.8.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "overrides": {
+    "postcss": "^8.5.28"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "embedded-postgres": true
+  },
+  "type": "module"
+}

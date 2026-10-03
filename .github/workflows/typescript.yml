@@ -1,0 +1,24 @@
+name: OpsAgent TypeScript
+on: [push, pull_request]
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: {POSTGRES_USER: opsagent, POSTGRES_PASSWORD: opsagent, POSTGRES_DB: opsagent}
+        ports: ['5433:5432']
+        options: --health-cmd "pg_isready -U opsagent" --health-interval 2s --health-retries 30
+    defaults:
+      run: {working-directory: opsagent-ts}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22, cache: npm, cache-dependency-path: opsagent-ts/package-lock.json}
+      - run: npm ci
+      - run: node scripts/ci-env.mjs
+      - run: npm run db:migrate
+      - run: npm run seed
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test:unit
